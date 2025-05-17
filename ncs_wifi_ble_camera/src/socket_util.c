@@ -90,6 +90,21 @@ static void trigger_socket_rx_callback_if_set() {
   }
 }
 
+static ssize_t sendall(int sock, const void *buf, size_t len)
+{
+	while (len) {
+		ssize_t out_len = send(sock, buf, len, 0);
+
+		if (out_len < 0) {
+			return out_len;
+		}
+		buf = (const char *)buf + out_len;
+		len -= out_len;
+	}
+
+	return 0;
+}
+
 int cam_send(const void *buf, size_t len) {
 #if defined(CONFIG_NET_TCP)
   if (tcp_server_socket == -1) {
@@ -98,8 +113,9 @@ int cam_send(const void *buf, size_t len) {
   if (len == 0) {
     return 0;
   }
-  if (send(tcp_server_socket, buf, len, 0) == -1) {
-    perror("Sending failed");
+  int ret = sendall(tcp_server_socket, buf, len);
+  if (ret && ret != -EAGAIN) {
+    printk("Sending failed %d\n", ret);
     close(tcp_server_socket);
     FATAL_ERROR();
     return -2;
