@@ -16,6 +16,7 @@ LOG_MODULE_REGISTER(NetCam, CONFIG_LOG_DEFAULT_LEVEL);
 #include <zephyr/drivers/video.h>
 #include <zephyr/kernel.h>
 
+#include "snapshot.h"
 #include "socket_util.h"
 
 #define VIDEO_DEV_SW "VIDEO_SW_GENERATOR"
@@ -47,6 +48,7 @@ extern struct sockaddr_in pc_addr;
 #define GET_SDK_VER_INFO 0X40
 #define SET_IMAGE_QUALITY 0X50
 #define SET_LOWPOWER_MODE 0X60
+#define SNAPSHOT 0x70
 
 /*
 ** Arducam mega communication protocols
@@ -248,6 +250,9 @@ int report_mega_info(void) {
 uint8_t recv_process(uint8_t *buff) {
   LOG_INF("recv_process: cmd %x, data %x", buff[0], buff[1]);
   switch (buff[0]) {
+    case SNAPSHOT:
+      SNAPSHOT_HANDLING_ASM();
+      break;
     case SET_PICTURE_RESOLUTION:
       LOG_INF("camcmd: SET_PICTURE_RESOLUTION");
       if (set_mega_resolution(buff[1], client_type_SOCKET) == 0) {

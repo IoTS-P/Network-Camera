@@ -1,6 +1,6 @@
 # nRF70_WiFi_Camera_Demo
 
-## TODO: add snapshot function
+## TODO: test snapshot function 
 
 WiFi Camera demo based on the nRF7002DK and the Arducam Mega Camera.
 
